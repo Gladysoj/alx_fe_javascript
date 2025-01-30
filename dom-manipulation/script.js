@@ -86,6 +86,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
+
+    function importFromJsonFile(event) {
+        const fileReader = new FileReader();
+        fileReader.onload = function(event) {
+          const importedQuotes = JSON.parse(event.target.result);
+          quotes.push(...importedQuotes);
+          saveQuotes();
+          alert('Quotes imported successfully!');
+        };
+        fileReader.readAsText(event.target.files[0]);
+      }
+
     function importFromFile() {
         const file = importFile.files[0];
         if (file) {
