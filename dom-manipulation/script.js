@@ -74,39 +74,41 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     
-    window.exportToJson = function() {
-        const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: 'application/json' });
+    function exportToJsonFile() {
+        const jsonData = JSON.stringify(quotes, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'quotes.json';
-        link.click();
-        URL.revokeObjectURL(url); 
-    };
-
-    window.importFromJsonFile = function(event) {
-        const file = event.target.files[0];
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'quotes.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    function importFromFile() {
+        const file = importFile.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const content = e.target.result;
+            reader.onload = (e) => {
                 try {
-                    const importedQuotes = JSON.parse(content);
-                    if (Array.isArray(importedQuotes)) {
-                        quotes = quotes.concat(importedQuotes); 
-                        saveQuotes(); 
+                    const content = JSON.parse(e.target.result);
+                    if (Array.isArray(content)) {
+                        quotes = [...quotes, ...content];
+                        populateCategories(); // Update categories after import
                         alert('Quotes imported successfully!');
-                        showRandomQuote(); 
                     } else {
-                        alert('Invalid format. Please ensure the file contains an array of quotes.');
+                        alert('Invalid file format. Please upload a JSON array of quotes.');
                     }
                 } catch (error) {
-                    alert('Error reading file: ' + error.message);
+                    alert('Error parsing JSON file: ' + error.message);
                 }
             };
             reader.readAsText(file);
         }
-    };
+    }
+    
+
     function populateCategories() {
         const categories = [...new Set(quotes.map(quote => quote.category))];
         categories.forEach(category => {
@@ -126,6 +128,29 @@ document.addEventListener('DOMContentLoaded', function() {
             quoteDisplay.innerHTML = '<p>No quotes found in this category.</p>';
         }
     }
+
+    function importFromFile() {
+        const file = importFile.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = JSON.parse(e.target.result);
+                    if (Array.isArray(content)) {
+                        quotes = [...quotes, ...content];
+                        populateCategories(); // Update categories after import
+                        alert('Quotes imported successfully!');
+                    } else {
+                        alert('Invalid file format. Please upload a JSON array of quotes.');
+                    }
+                } catch (error) {
+                    alert('Error parsing JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+    }
+    
 
     function addQuote(quote) {
         // Simulate server interaction with a delay
@@ -167,6 +192,11 @@ document.addEventListener('DOMContentLoaded', function() {
     createAddQuoteForm();  
     showRandomQuote();     
 
+    populateCategories();
+    displayRandomQuote();
+
     
     newQuoteButton.addEventListener('click', showRandomQuote);
 });
+
+
