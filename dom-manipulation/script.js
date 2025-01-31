@@ -150,6 +150,8 @@ document.addEventListener('DOMContentLoaded', function() {
             quotes.push(quote);
             populateCategories();
             alert('Quote added successfully!');
+            displayRandomQuote();
+            postQuoteToServer(quote);
         }, 1000);
     }
     
@@ -224,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     populateCategories();
     displayRandomQuote();
+    syncQuotes();
 
     
     newQuoteButton.addEventListener('click', showRandomQuote);
