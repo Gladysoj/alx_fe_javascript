@@ -98,27 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileReader.readAsText(event.target.files[0]);
       }
 
-    function importFromFile() {
-        const file = importFile.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const content = JSON.parse(e.target.result);
-                    if (Array.isArray(content)) {
-                        quotes = [...quotes, ...content];
-                        populateCategories(); // Update categories after import
-                        alert('Quotes imported successfully!');
-                    } else {
-                        alert('Invalid file format. Please upload a JSON array of quotes.');
-                    }
-                } catch (error) {
-                    alert('Error parsing JSON file: ' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
-    }
+    
     
 
     function populateCategories() {
@@ -185,6 +165,44 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Data sync completed!');
         }, 2000);
     }
+
+    function fetchQuotesFromServer() {
+        // Simulate fetching from server
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve([
+                    { text: "New quote from server", author: "Server", category: "Server" }
+                ]);
+            }, 2000);
+        });
+    }
+
+    function postQuoteToServer(quote) {
+        // Simulate posting to server
+        console.log("Posted to server:", quote);
+    }
+
+    function syncQuotes() {
+        fetchQuotesFromServer().then(serverQuotes => {
+            const updatedQuotes = resolveConflicts(quotes, serverQuotes);
+            if (updatedQuotes.length > quotes.length) {
+                quotes = updatedQuotes;
+                populateCategories();
+                displayRandomQuote();
+                statusMessage.innerHTML = '<p>Quotes updated from server.</p>';
+            } else if (updatedQuotes.length < quotes.length) {
+                statusMessage.innerHTML = '<p>Conflict resolved. Some quotes might have been removed.</p>';
+            } else {
+                statusMessage.innerHTML = '<p>No new quotes from server.</p>';
+            }
+            setTimeout(syncQuotes, 10000); // Sync every 10 seconds
+        }).catch(error => {
+            console.error("Error syncing quotes:", error);
+            statusMessage.innerHTML = '<p>Failed to sync quotes from server.</p>';
+        });
+    }
+    
+
 
     function resolveConflicts(localQuotes, serverQuotes) {
         // Here, we'll just merge new server quotes not present in local
